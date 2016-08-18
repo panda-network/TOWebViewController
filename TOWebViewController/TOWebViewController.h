@@ -42,12 +42,17 @@
  */
 - (instancetype)initWithURLString:(NSString *)urlString;
 
-/** 
- Get/set the current URL being displayed. (Will automatically start loading) 
+/**
+ Get/set the current URL being displayed. (Will automatically start loading)
  */
 @property (nonatomic,strong)    NSURL *url;
 
-/** 
+/**
+ Get/set the sharing URL
+ */
+@property (nonatomic,strong)    NSURL *shareUrl;
+
+/**
  Get/set the request
  */
 @property (nonatomic,strong)    NSMutableURLRequest *urlRequest;
@@ -60,21 +65,21 @@
  */
 @property (nonatomic,readonly)  UIWebView *webView;
 
-/** 
- Shows a loading progress bar underneath the top navigation bar. 
+/**
+ Shows a loading progress bar underneath the top navigation bar.
  
  Default value is YES.
  */
 @property (nonatomic,assign)    BOOL showLoadingBar;
 
-/** 
+/**
  Shows the URL of the web request currently being loaded, before the page's title attribute becomes available.
  
  Default value is YES.
  */
 @property (nonatomic,assign)    BOOL showUrlWhileLoading;
 
-/** 
+/**
  The tint colour of the page loading progress bar.
  If not set on iOS 7 and above, the loading bar will defer to the app's global UIView tint color.
  If not set on iOS 6 or below, it will default to the standard system blue tint color.
@@ -121,12 +126,12 @@
 
 /**
  Shows the Done button when presented modally. When tapped, it dismisses the view controller.
-
+ 
  Default value is YES.
  */
 @property (nonatomic,assign)    BOOL showDoneButton;
 
-/** 
+/**
  If desired, override the title of the system 'Done' button to this string.
  
  Default value is nil.
@@ -141,14 +146,14 @@
  */
 @property (nonatomic,assign)    BOOL showPageTitles;
 
-/** 
+/**
  Disables the contextual popups that can appear when the user taps and holds on a page link.
  
  Default value is NO.
  */
 @property (nonatomic,assign)    BOOL disableContextualPopupMenu;
 
-/** 
+/**
  Hides the default system background behind the outer bounds of the webview, and replaces it with
  a background color derived from the the page content currently being displayed by the web view.
  
@@ -156,7 +161,7 @@
  */
 @property (nonatomic,assign)    BOOL hideWebViewBoundaries;
 
-/** 
+/**
  When the view controller is being presented as a modal popup, this block will be automatically performed
  right after the view controller is dismissed.
  */
@@ -169,8 +174,8 @@
 @property (nonatomic,copy)      BOOL (^shouldStartLoadRequestHandler)(NSURLRequest *request, UIWebViewNavigationType navigationType);
 
 /**
-An optional block that when set, will be triggered each time the web view has finished a load operation.
-*/
+ An optional block that when set, will be triggered each time the web view has finished a load operation.
+ */
 @property (nonatomic,copy)      void (^didFinishLoadHandler)(UIWebView *webView);
 
 /**
@@ -187,7 +192,7 @@ An optional block that when set, will be triggered each time the web view has fi
  */
 @property (nonatomic,strong)    UIColor *doneButtonTintColor;
 
-/** 
+/**
  On iOS 6 or below, this overrides the default opacity level of the bevel around the navigation buttons.
  */
 @property (nonatomic,assign)    CGFloat buttonBevelOpacity;

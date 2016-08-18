@@ -61,10 +61,10 @@
 #pragma mark -
 #pragma mark Hidden Properties/Methods
 @interface TOWebViewController () <UIActionSheetDelegate,
-                                   UIPopoverControllerDelegate,
-                                   MFMailComposeViewControllerDelegate,
-                                   MFMessageComposeViewControllerDelegate,
-                                   NJKWebViewProgressDelegate>
+UIPopoverControllerDelegate,
+MFMailComposeViewControllerDelegate,
+MFMessageComposeViewControllerDelegate,
+NJKWebViewProgressDelegate>
 {
     
     //The state of the UIWebView's scroll view before the rotation animation has started
@@ -177,7 +177,7 @@
 {
     if (self = [super initWithCoder:aDecoder])
         [self setup];
-
+    
     return self;
 }
 
@@ -185,14 +185,16 @@
 {
     if (self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil])
         [self setup];
-  
+    
     return self;
 }
 
 - (instancetype)initWithURL:(NSURL *)url
 {
-    if (self = [super init])
+    if (self = [super init]) {
         _url = [self cleanURL:url];
+        _shareUrl = [self cleanURL:url];
+    }
     
     return self;
 }
@@ -229,7 +231,7 @@
     
     //Set the initial default style as full screen (But this can be easily overridden)
     self.modalPresentationStyle = UIModalPresentationFullScreen;
-
+    
     //Set the URL request
     self.urlRequest = [[NSMutableURLRequest alloc] init];
 }
@@ -263,7 +265,7 @@
     self.webView.contentMode = UIViewContentModeRedraw;
     self.webView.opaque = YES;
     [self.view addSubview:self.webView];
-
+    
     CGFloat progressBarHeight = 2.f;
     CGRect navigationBarBounds = self.navigationController.navigationBar.bounds;
     CGRect barFrame = CGRectMake(0, navigationBarBounds.size.height - progressBarHeight, navigationBarBounds.size.width, progressBarHeight);
@@ -337,13 +339,13 @@
     if (self.showDoneButton && self.beingPresentedModally && !self.onTopOfNavigationControllerStack) {
         if (self.doneButtonTitle) {
             self.doneButton = [[UIBarButtonItem alloc] initWithTitle:self.doneButtonTitle style:UIBarButtonItemStyleDone
-                                                         target:self
-                                                         action:@selector(doneButtonTapped:)];
+                                                              target:self
+                                                              action:@selector(doneButtonTapped:)];
         }
         else {
             self.doneButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone
-                                                                                        target:self
-                                                                                        action:@selector(doneButtonTapped:)];
+                                                                            target:self
+                                                                            action:@selector(doneButtonTapped:)];
         }
         
         self.doneButton.tintColor = self.doneButtonTintColor;
@@ -473,7 +475,7 @@
         return ([self.navigationController.viewControllers indexOfObject:self] == 0);
     else // Check if we're being presented modally directly
         return ([self presentingViewController] != nil);
-
+    
     return NO;
 }
 
@@ -507,7 +509,7 @@
 - (void)layoutButtonsForCurrentSizeClass
 {
     [self.navigationController setToolbarHidden:(!self.compactPresentation || self.navigationButtonsHidden) animated:NO];
-        
+    
     //Reset the lot
     self.toolbarItems = nil;
     self.navigationItem.leftBarButtonItems = nil;
@@ -519,7 +521,7 @@
         self.navigationItem.leftBarButtonItems = self.applicationLeftBarButtonItems;
         self.navigationItem.leftItemsSupplementBackButton = YES;
     }
-
+    
     //Handle iPhone Layout
     if (self.compactPresentation) {
         
@@ -708,7 +710,7 @@
         [self setUpNavigationButtons];
     }
     
-     [self layoutButtonsForCurrentSizeClass];
+    [self layoutButtonsForCurrentSizeClass];
 }
 
 - (void)setButtonTintColor:(UIColor *)buttonTintColor
@@ -965,7 +967,7 @@
     // If we're on iOS 6 or above, we can use the super-duper activity view controller :)
     if (NSClassFromString(@"UIPresentationController")) {
         NSArray *browserActivities = @[[TOActivitySafari new], [TOActivityChrome new]];
-        UIActivityViewController *activityViewController = [[UIActivityViewController alloc] initWithActivityItems:@[self.url] applicationActivities:browserActivities];
+        UIActivityViewController *activityViewController = [[UIActivityViewController alloc] initWithActivityItems:@[self.shareUrl] applicationActivities:browserActivities];
         activityViewController.modalPresentationStyle = UIModalPresentationPopover;
         activityViewController.popoverPresentationController.barButtonItem = self.actionButton;
         [self presentViewController:activityViewController animated:YES completion:nil];
@@ -973,7 +975,7 @@
     else if (NSClassFromString(@"UIActivityViewController"))
     {
         NSArray *browserActivities = @[[TOActivitySafari new], [TOActivityChrome new]];
-        UIActivityViewController *activityViewController = [[UIActivityViewController alloc] initWithActivityItems:@[self.url] applicationActivities:browserActivities];
+        UIActivityViewController *activityViewController = [[UIActivityViewController alloc] initWithActivityItems:@[self.shareUrl] applicationActivities:browserActivities];
         
         if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone)
         {
@@ -997,13 +999,13 @@
             self.sharingPopoverController = [[UIPopoverController alloc] initWithContentViewController:activityViewController];
             self.sharingPopoverController.delegate = self;
             [self.sharingPopoverController presentPopoverFromBarButtonItem:self.actionButton permittedArrowDirections:UIPopoverArrowDirectionAny animated:YES];
-
+            
 #pragma GCC diagnostic pop
         }
     }
     else //We must be on iOS 5
     {
-
+        
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
         
@@ -1012,9 +1014,9 @@
                                                         cancelButtonTitle:nil
                                                    destructiveButtonTitle:nil
                                                         otherButtonTitles:NSLocalizedStringFromTable(@"Copy URL", @"TOWebViewControllerLocalizable", @"Copy the URL"), nil];
-
+        
         NSInteger numberOfButtons = 1;
-
+        
         //Add Browser
         BOOL chromeIsInstalled = [[UIApplication sharedApplication] canOpenURL:[NSURL URLWithString:@"googlechrome://"]];
         NSString *browserMessage = NSLocalizedStringFromTable(@"Open in Safari", @"TOWebViewControllerLocalizable", @"Open in Safari");
@@ -1041,7 +1043,7 @@
             [actionSheet addButtonWithTitle:NSLocalizedStringFromTable(@"Twitter", @"TOWebViewControllerLocalizable", @"Send a Tweet")];
             numberOfButtons++;
         }
-
+        
         
         //Add a cancel button if on iPhone
         if (self.compactPresentation) {
@@ -1053,7 +1055,7 @@
             [actionSheet showFromRect:[(UIView *)sender frame] inView:[(UIView *)sender superview] animated:YES];
         }
         
-        #pragma clang diagnostic pop
+#pragma clang diagnostic pop
     }
 }
 
@@ -1075,10 +1077,10 @@
                 [self openMailDialog];
             else if ([MFMessageComposeViewController canSendText])
                 [self openMessageDialog];
-
+            
             else if ([TWTweetComposeViewController canSendTweet])
                 [self openTwitterDialog];
-
+            
         }
             break;
         case 3: //SMS or Twitter
@@ -1117,6 +1119,7 @@
 {
     BOOL chromeIsInstalled = [[UIApplication sharedApplication] canOpenURL:[NSURL URLWithString:@"googlechrome://"]];
     NSURL *inputURL = self.webView.request.URL;
+    NSLog(inputURL);
     
     if (chromeIsInstalled)
     {
@@ -1207,13 +1210,13 @@
 {
     //A bit of a crazy JavaScript that scans the HTML for a <meta name="viewport"> tag and retrieves its contents
     NSString *metaDataQuery =   @"(function() {"
-                                @"var metaTags = document.getElementsByTagName('meta');"
-                                @"for (i=0; i<metaTags.length; i++) {"
-                                @"if (metaTags[i].name=='viewport') {"
-                                @"return metaTags[i].getAttribute('content');"
-                                @"}"
-                                @"}"
-                                @"})()";
+    @"var metaTags = document.getElementsByTagName('meta');"
+    @"for (i=0; i<metaTags.length; i++) {"
+    @"if (metaTags[i].name=='viewport') {"
+    @"return metaTags[i].getAttribute('content');"
+    @"}"
+    @"}"
+    @"})()";
     
     NSString *pageViewPortContent = [self.webView stringByEvaluatingJavaScriptFromString:metaDataQuery];
     if ([pageViewPortContent length] == 0)
@@ -1517,7 +1520,7 @@
         CGFloat zoomScale = (self.webView.scrollView.minimumZoomScale+self.webView.scrollView.maximumZoomScale) * 0.5f;
         [self.webView.scrollView setZoomScale:zoomScale animated:YES];
     }
-        
+    
     //hide the webview while the snapshot is animating
     self.webView.hidden = YES;
 }
@@ -1651,7 +1654,7 @@
 {
     //when the rotation and animation is complete, FINALLY unhide the web view
     self.webView.hidden = NO;
-
+    
     CGSize contentSize = self.webView.scrollView.contentSize;
     CGPoint translatedContentOffset = _webViewState.contentOffset;
     
@@ -1665,11 +1668,11 @@
     else //else, determine the magnitude we zoomed in/out by and translate the scroll offset to line it up properly
     {
         CGFloat magnitude = contentSize.width / _webViewState.contentSize.width;
-
+        
         //transform the translated offset
         translatedContentOffset.x *= magnitude;
         translatedContentOffset.y *= magnitude;
-
+        
         //if we were sufficiently scrolled from the top, make sure to line up to the middle, not the top
         if ((_webViewState.contentOffset.y + _webViewState.topEdgeInset) > FLT_EPSILON)
         {
